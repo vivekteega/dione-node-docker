@@ -10,10 +10,11 @@
 #     ./scripts/build.sh
 
 # Stage 2: Runtime
-FROM debian:bullseye-slim
+# FROM debian:bullseye-slim
+FROM ubuntu:22.04
 
 # Metadata
-LABEL maintainer="Vivek Teegalapally <youremail@example.com>" \
+LABEL maintainer="Vivek Teegalapally <vivek.teega@gmail.com>" \
       description="Docker image for OdysseyGo node with configurable options"
 
 # Define build arguments and environment variables
@@ -30,6 +31,7 @@ RUN apt-get update && \
         tar \
         gnupg \
         jq \
+        build-essential \
         && rm -rf /var/lib/apt/lists/*
 
 # Define environment variables for OdysseyGo with sensible defaults
@@ -70,12 +72,11 @@ WORKDIR /odysseygo
 # Download OdysseyGo binary and verify checksum
 RUN echo "Downloading OdysseyGo version ${ODOMYSGO_VERSION_ARG}" && \
     echo "https://github.com/DioneProtocol/odysseygo/releases/download/v${ODOMYSGO_VERSION_ARG}/odysseygo-linux-amd64-v${ODOMYSGO_VERSION_ARG}.tar.gz" && \
-    wget -q "https://github.com/DioneProtocol/odysseygo/releases/download/v${ODOMYSGO_VERSION_ARG}/odysseygo-linux-amd64-v${ODOMYSGO_VERSION_ARG}.tar.gz" -O odysseygo.tar.gz && \
+    wget -q "https://github.com/DioneProtocol/odysseygo/releases/download/v1.10.11/odysseygo-linux-amd64-v1.10.11.tar.gz" -O odysseygo.tar.gz && \
     # wget -q "https://github.com/DioneProtocol/odysseygo/releases/download/v${ODOMYSGO_VERSION_ARG}/SHA256SUMS" -O SHA256SUMS && \
     # echo "$(grep odysseygo-linux-amd64-v${ODOMYSGO_VERSION}.tar.gz SHA256SUMS)" | sha256sum -c - && \
-    tar -xzf odysseygo.tar.gz -C odyssey-node --strip-components=1 && \
+    tar -xzf odysseygo.tar.gz -C /odysseygo/odyssey-node --strip-components=1 && \
     rm odysseygo.tar.gz
-
 
 # Optional: If you prefer building from source when a specific version is not available
 # Uncomment the following block if building from source is desired
@@ -89,6 +90,7 @@ RUN echo "Downloading OdysseyGo version ${ODOMYSGO_VERSION_ARG}" && \
 #         rm -rf odysseygo; \
 #     fi
 
+RUN ls -la
 
 # Expose necessary ports
 EXPOSE 9650 9651

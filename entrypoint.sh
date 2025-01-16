@@ -23,6 +23,8 @@ create_node_config() {
     local config_path="/odysseygo/.odysseygo/configs/node.json"
     mkdir -p "$(dirname "$config_path")"
 
+    echo "Creating node configuration at $config_path"
+
     # Start building the JSON configuration
     jq -n \
         --arg log_level "$LOG_LEVEL_NODE" \
@@ -43,19 +45,30 @@ create_node_config() {
 
     # Add HTTP allowed hosts if RPC_ACCESS is public
     if [ "$RPC_ACCESS" = "public" ]; then
+        echo "Configuring RPC access as public"
         jq '. + { "http-allowed-hosts": "*" }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
     fi
 
     # Add public IP or dynamic resolution
     if [ "$IP_MODE" = "static" ]; then
+        if [ -z "$PUBLIC_IP" ]; then
+            echo "IP_MODE is set to 'static' but PUBLIC_IP is not provided. Exiting."
+            exit 1
+        fi
+
         if validate_ip "$PUBLIC_IP"; then
+            echo "Setting static public IP: $PUBLIC_IP"
             jq --arg public_ip "$PUBLIC_IP" '. + { "public-ip": $public_ip }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
         else
-            echo "Invalid PUBLIC_IP provided. Exiting."
+            echo "Invalid PUBLIC_IP provided: $PUBLIC_IP. Exiting."
             exit 1
         fi
     elif [ "$IP_MODE" = "dynamic" ]; then
+        echo "Configuring dynamic IP resolution via OpenDNS"
         jq '. + { "public-ip-resolution-service": "opendns" }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
+    else
+        echo "Invalid IP_MODE: $IP_MODE. Allowed values are 'static' or 'dynamic'. Exiting."
+        exit 1
     fi
 }
 
@@ -63,6 +76,8 @@ create_node_config() {
 create_dchain_config() {
     local config_path="/odysseygo/.odysseygo/configs/chains/D/config.json"
     mkdir -p "$(dirname "$config_path")"
+
+    echo "Creating D-Chain configuration at $config_path"
 
     # Start building the JSON configuration
     jq -n \
@@ -88,11 +103,13 @@ create_dchain_config() {
 
     # Append debug APIs if ETH_DEBUG_RPC is true
     if [ "$ETH_DEBUG_RPC" = "true" ]; then
+        echo "Enabling Ethereum Debug RPC APIs"
         jq '.["eth-apis"] += ["internal-debug", "debug-tracer"]' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
     fi
 
     # Add pruning if archival mode is enabled
     if [ "$ARCHIVAL_MODE" = "true" ]; then
+        echo "Disabling pruning for archival mode"
         jq '. + { "pruning-enabled": false }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
     fi
 }
@@ -105,7 +122,7 @@ Options:
     -e RPC_ACCESS=public|private
     -e STATE_SYNC=on|off
     -e IP_MODE=dynamic|static
-    -e PUBLIC_IP=your_public_ip
+    -e PUBLIC_IP=your_public_ip          # Required if IP_MODE=static
     -e DB_DIR=/path/to/db
     -e LOG_LEVEL_NODE=info|debug
     -e LOG_LEVEL_DCHAIN=info|debug
@@ -116,14 +133,24 @@ Options:
     -v /host/path/.odysseygo:/odysseygo/.odysseygo
     -v /host/path/odyssey-node:/odysseygo/odyssey-node
     -v /host/path/db:/odysseygo/db
+    -v /host/path/logs:/var/log/odysseygo
+    -p 9650:9650
+    -p 9651:9651
     --network your_network
     --restart unless-stopped
-    ..."
+    --help                             Show this help message and exit
+..."
     exit 1
 }
 
 # Handle help flag
 if [[ "$1" == "--help" ]]; then
+    usage
+fi
+
+# Ensure required environment variables are set based on IP_MODE
+if [ "$IP_MODE" = "static" ] && [ -z "$PUBLIC_IP" ]; then
+    echo "Error: IP_MODE is set to 'static' but PUBLIC_IP is not provided."
     usage
 fi
 
@@ -135,7 +162,7 @@ create_dchain_config
 CMD="/odysseygo/odyssey-node/odysseygo"
 
 # Append additional flags based on environment variables
-CMD+=" --config-file=/odysseygo/.odysseygo/configs/node.json"
+# CMD+=" --config-file=/odysseygo/.odysseygo/configs/node.json"
 
 # Example of adding more flags if needed
 # CMD+=" --another-flag=value"
@@ -144,4 +171,5 @@ CMD+=" --config-file=/odysseygo/.odysseygo/configs/node.json"
 mkdir -p "$DB_DIR"
 
 # Start OdysseyGo and redirect logs to stdout
+echo "Starting OdysseyGo with command: $CMD --log-dir=/var/log/odysseygo"
 exec "$CMD" --log-dir=/var/log/odysseygo
