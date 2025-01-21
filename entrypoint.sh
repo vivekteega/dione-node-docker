@@ -46,7 +46,7 @@ create_node_config() {
     # Add HTTP allowed hosts if RPC_ACCESS is public
     if [ "$RPC_ACCESS" = "public" ]; then
         echo "Configuring RPC access as public"
-        jq '. + { "http-allowed-hosts": "*" }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
+        jq '. + { "http-host": "" }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
     fi
 
     # Add public IP or dynamic resolution
@@ -158,18 +158,31 @@ fi
 create_node_config
 create_dchain_config
 
-# Construct OdysseyGo command with dynamic arguments
-CMD="/odysseygo/odyssey-node/odysseygo"
+# # Construct OdysseyGo command with dynamic arguments
+# CMD="/odysseygo/odyssey-node/odysseygo"
 
-# Append additional flags based on environment variables
-# CMD+=" --config-file=/odysseygo/.odysseygo/configs/node.json"
+# # Append additional flags based on environment variables
+CMD+=" --config-file=/odysseygo/.odysseygo/configs/node.json"
 
-# Example of adding more flags if needed
-# CMD+=" --another-flag=value"
+echo "cd /odysseygo/ && tree"
+cd /odysseygo/ && tree
 
-# Ensure the DB directory exists
+echo "cd /odysseygo/.odysseygo/ && tree"
+cd /odysseygo/.odysseygo/ && tree
+
+echo "cat /odysseygo/.odysseygo/configs/node.json"
+cat /odysseygo/.odysseygo/configs/node.json
+
+echo "cat /odysseygo/.odysseygo/configs/chains/D/config.json"
+cat /odysseygo/.odysseygo/configs/chains/D/config.json
+
+# # Example of adding more flags if needed
+# # CMD+=" --another-flag=value"
+
+# # Ensure the DB directory exists
 mkdir -p "$DB_DIR"
 
-# Start OdysseyGo and redirect logs to stdout
+# # Start OdysseyGo and redirect logs to stdout
 echo "Starting OdysseyGo with command: $CMD --log-dir=/var/log/odysseygo"
-exec "$CMD" --log-dir=/var/log/odysseygo
+# exec "$CMD" --log-dir=/var/log/odysseygo
+/odysseygo/odyssey-node/odysseygo --http-allowed-hosts="*" --config-file=/odysseygo/.odysseygo/configs/node.json --log-dir=/var/log/odysseygo

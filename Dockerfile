@@ -32,14 +32,17 @@ RUN apt-get update && \
         gnupg \
         jq \
         build-essential \
+        tree \ 
+        net-tools \
+        dnsutils \
         && rm -rf /var/lib/apt/lists/*
 
 # Define environment variables for OdysseyGo with sensible defaults
 ENV NETWORK=testnet \
-    RPC_ACCESS=private \
-    STATE_SYNC=off \
-    IP_MODE=static \
-    PUBLIC_IP="" \
+    RPC_ACCESS=public \
+    STATE_SYNC=on \
+    IP_MODE=dynamic \
+    # PUBLIC_IP="0.0.0.0" \
     DB_DIR=/odysseygo/db \
     LOG_LEVEL_NODE=info \
     LOG_LEVEL_DCHAIN=info \
@@ -96,7 +99,7 @@ RUN ls -la
 EXPOSE 9650 9651
 
 # Define volumes for persistent data
-VOLUME ["/odysseygo/.odysseygo", "/odysseygo/odyssey-node", "/odysseygo/db", "/var/log/odysseygo"]
+# VOLUME ["/odysseygo/.odysseygo", "/odysseygo/odyssey-node", "/odysseygo/db", "/var/log/odysseygo"]
 
 # Set the entrypoint
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

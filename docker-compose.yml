@@ -4,18 +4,18 @@ services:
   odysseygo:
     image: odysseygo:develop
     container_name: odysseygo
-    restart: unless-stopped
+    restart: no
     environment:
       - NETWORK=testnet
       - RPC_ACCESS=public
       - STATE_SYNC=on
-      - IP_MODE=static
-      - PUBLIC_IP=42.108.76.8
+      - IP_MODE=dynamic
+      # - PUBLIC_IP=0.0.0.0
       - DB_DIR=/odysseygo/db
       - LOG_LEVEL_NODE=info
       - LOG_LEVEL_DCHAIN=info
       - INDEX_ENABLED=false
-      - ARCHIVAL_MODE=false
+      - ARCHIVAL_MODE=true
       - ADMIN_API=false
       - ETH_DEBUG_RPC=false
     # volumes:
