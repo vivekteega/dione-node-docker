@@ -28,25 +28,47 @@ create_node_config() {
     # Start building the JSON configuration
     jq -n \
         --arg log_level "$LOG_LEVEL_NODE" \
-        --arg network "$NETWORK" \
-        --arg rpc_access "$RPC_ACCESS" \
-        --arg db_dir "$DB_DIR" \
-        --arg ip_mode "$IP_MODE" \
-        --arg public_ip "$PUBLIC_IP" \
-        --argjson index_enabled "$INDEX_ENABLED" \
-        --argjson admin_api "$ADMIN_API" \
         '{
             "log-level": $log_level,
-            "network-id": ($network // "mainnet"),
-            "db-dir": $db_dir,
-            "index-enabled": $index_enabled,
-            "api-admin-enabled": $admin_api
         }' > "$config_path"
 
     # Add HTTP allowed hosts if RPC_ACCESS is public
     if [ "$RPC_ACCESS" = "public" ]; then
         echo "Configuring RPC access as public"
         jq '. + { "http-host": "" }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
+    fi
+
+    # Add HTTP allowed hosts if RPC_ACCESS is public
+    if [ "$ADMIN_API" = "true" ]; then
+        echo "Configuring ADMIN_API as true"
+        jq '. + { "api-admin-enabled": true }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
+    fi
+
+    # Add HTTP allowed hosts if RPC_ACCESS is public
+    if [ "$INDEX_ENABLED" = "true" ]; then
+        echo "Configuring RPC access as public"
+        jq '. + { "index-enabled": true }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
+    fi
+    
+
+    if [ "$NETWORK" = "testnet" ]; then
+        echo "Configuring RPC access as public"
+        jq '. + { "network-id": "testnet" }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
+    elif [ "$NETWORK" = "mainnet" ]; then
+        echo "Configuring RPC access as public"
+        jq '. + { "network-id": "mainnet" }' "$config_path" > "${config_path}.tmp" && mv "${config_path}.tmp" "$config_path"
+    else
+        echo "Invalid NETWORK: $NETWORK. Allowed values are 'mainnet' or 'testnet'. Exiting."
+        exit 1
+    fi
+    
+
+    # Add db directory if DB_DIR is set
+    if [ -n "${DB_DIR:-}" ]; then
+        mkdir -p "$DB_DIR"
+        echo "Adding db-dir to configuration: $DB_DIR"
+        jq --arg db_dir "$DB_DIR" '. + { "db-dir": $db_dir }' "$config_path" > "${config_path}.tmp" \
+            && mv "${config_path}.tmp" "$config_path"
     fi
 
     # Add public IP or dynamic resolution
@@ -180,7 +202,7 @@ cat /odysseygo/.odysseygo/configs/chains/D/config.json
 # # CMD+=" --another-flag=value"
 
 # # Ensure the DB directory exists
-mkdir -p "$DB_DIR"
+# mkdir -p "$DB_DIR"
 
 # # Start OdysseyGo and redirect logs to stdout
 echo "Starting OdysseyGo with command: $CMD --log-dir=/var/log/odysseygo"

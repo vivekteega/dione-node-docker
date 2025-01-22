@@ -32,8 +32,6 @@ RUN apt-get update && \
         gnupg \
         jq \
         build-essential \
-        tree \ 
-        net-tools \
         dnsutils \
         && rm -rf /var/lib/apt/lists/*
 
@@ -42,8 +40,8 @@ ENV NETWORK=testnet \
     RPC_ACCESS=public \
     STATE_SYNC=on \
     IP_MODE=dynamic \
-    # PUBLIC_IP="0.0.0.0" \
-    DB_DIR=/odysseygo/db \
+    PUBLIC_IP="0.0.0.0" \
+    # DB_DIR=/odysseygo/db \
     LOG_LEVEL_NODE=info \
     LOG_LEVEL_DCHAIN=info \
     INDEX_ENABLED=false \
