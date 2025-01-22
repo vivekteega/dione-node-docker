@@ -81,6 +81,8 @@ The provided docker-compose.yml includes:
 ### Running a Testnet Node
 `docker-compose up -d`
 
+Note : Make changes in the docker-compose-yml file
+
 ### Running a Mainnet Node
 `NETWORK=mainnet docker-compose up -d`
 
