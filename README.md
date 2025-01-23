@@ -24,8 +24,8 @@ A Docker implementation of OdysseyGo node with configurable options for running 
 
 1. Clone the repository:
 ```
-git clone https://github.com/DioneProtocol/odysseygo-installer/
-cd odysseygo-docker
+git clone https://github.com/vivekteega/odysseygo-installer/
+cd odysseygo-installer
 ```
 
 2. Create required directories:
@@ -76,21 +76,56 @@ The provided docker-compose.yml includes:
 │   └── db/            # Blockchain data
 └── logs/              # Node logs
 
-## Usage Examples
 
-### Running a Testnet Node
+## Running Nodes: A Quick Guide
+
+1. Testnet Node (Default)
 `docker-compose up -d`
+Pro Tip: Uses default testnet configuration in docker-compose.yml.
 
-Note : Make changes in the docker-compose-yml file
-
-### Running a Mainnet Node
+2. Mainnet Node
 `NETWORK=mainnet docker-compose up -d`
+How to Change: Modify NETWORK environment variable.
 
-### Running an Archival Node
+3. Archival Node
 `ARCHIVAL_MODE=true docker-compose up -d`
+Context: Keeps full historical blockchain data.
 
-### Running with Static IP
+4. Static IP Node
 `IP_MODE=static PUBLIC_IP=203.0.113.1 docker-compose up -d`
+Important: Replace 203.0.113.1 with your actual public IP.
+
+
+### Changing Environment Variables: 3 Ways
+
+1. Temporary Override
+
+Use environment variables in command line
+Example: `NETWORK=mainnet ARCHIVAL_MODE=true docker-compose up -d`
+
+
+2. Permanent Changes
+
+Edit docker-compose.yml
+Modify environment: section
+
+```
+environment:
+  - NETWORK=mainnet
+  - ARCHIVAL_MODE=true
+```
+
+3. Using .env File
+
+Create .env file in same directory
+```
+NETWORK=mainnet
+ARCHIVAL_MODE=true
+```
+
+Docker Compose automatically loads variables
+
+Tip: Restart container after changing configurations. CopyRetryClaude does not have the ability to run the code it generates yet.
 
 ## Volumes
 
