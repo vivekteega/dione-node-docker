@@ -1,5 +1,7 @@
-./data
-./data/*
+data
+data/*
 
-./logs
-./logs/*
+logs
+logs/*
+
+helper-notes
