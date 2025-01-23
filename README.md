@@ -67,6 +67,7 @@ The provided docker-compose.yml includes:
 
 ## Directory Structure
 
+```
 .
 ├── Dockerfile
 ├── entrypoint.sh
@@ -75,36 +76,45 @@ The provided docker-compose.yml includes:
 │   ├── .odysseygo/    # Node configuration
 │   └── db/            # Blockchain data
 └── logs/              # Node logs
+```
 
 
 ## Running Nodes: A Quick Guide
 
 1. Testnet Node (Default)
+
 `docker-compose up -d`
+
 Pro Tip: Uses default testnet configuration in docker-compose.yml.
 
 2. Mainnet Node
+
 `NETWORK=mainnet docker-compose up -d`
+
 How to Change: Modify NETWORK environment variable.
 
 3. Archival Node
+
 `ARCHIVAL_MODE=true docker-compose up -d`
+
 Context: Keeps full historical blockchain data.
 
 4. Static IP Node
+
 `IP_MODE=static PUBLIC_IP=203.0.113.1 docker-compose up -d`
+
 Important: Replace 203.0.113.1 with your actual public IP.
 
 
 ### Changing Environment Variables: 3 Ways
 
-1. Temporary Override
+#### Temporary Override
 
 Use environment variables in command line
 Example: `NETWORK=mainnet ARCHIVAL_MODE=true docker-compose up -d`
 
 
-2. Permanent Changes
+#### Permanent Changes
 
 Edit docker-compose.yml
 Modify environment: section
@@ -115,7 +125,7 @@ environment:
   - ARCHIVAL_MODE=true
 ```
 
-3. Using .env File
+#### Using .env File
 
 Create .env file in same directory
 ```
@@ -125,7 +135,7 @@ ARCHIVAL_MODE=true
 
 Docker Compose automatically loads variables
 
-Tip: Restart container after changing configurations. CopyRetryClaude does not have the ability to run the code it generates yet.
+Tip: Restart container after changing configurations. 
 
 ## Volumes
 
